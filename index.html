@@ -1,14 +1,33 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <title>碎光 Shatterline</title>
+  <title>Shatterline</title>
   <style>
+    /* ---------- 字体（自托管，latin 子集，共 ~37KB）---------- */
+    @font-face { font-family: 'Orbitron'; font-style: normal; font-weight: 700 900; font-display: swap;
+      src: url(fonts/orbitron-var.woff2) format('woff2'); }
+    @font-face { font-family: 'Rajdhani'; font-style: normal; font-weight: 500; font-display: swap;
+      src: url(fonts/rajdhani-500.woff2) format('woff2'); }
+    @font-face { font-family: 'Rajdhani'; font-style: normal; font-weight: 700; font-display: swap;
+      src: url(fonts/rajdhani-700.woff2) format('woff2'); }
+    @font-face { font-family: 'Share Tech Mono'; font-style: normal; font-weight: 400; font-display: swap;
+      src: url(fonts/share-tech-mono.woff2) format('woff2'); }
+
+    :root {
+      --font-display: 'Orbitron', 'Avenir Next', 'Segoe UI', sans-serif;      /* 标题 / 按钮 */
+      --font-ui: 'Rajdhani', 'Avenir Next', 'Segoe UI', sans-serif;           /* 说明 / 标签 */
+      --font-mono: 'Share Tech Mono', 'SF Mono', Menlo, Consolas, monospace;  /* HUD 数字 / 小字 */
+      --cyan: #6ef2ff;
+      --magenta: #ff5fd0;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a10; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+      font-family: var(--font-ui);
+      -webkit-font-smoothing: antialiased;
       -webkit-user-select: none; user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
@@ -29,14 +48,15 @@
     @keyframes flash { from { opacity: 1; } to { opacity: 0; } }
 
     #topbar {
-      position: absolute; top: max(14px, env(safe-area-inset-top)); left: 0; right: 0;
-      display: flex; justify-content: space-between; padding: 0 22px;
-      color: #d8f6ff; text-shadow: 0 0 12px rgba(110, 242, 255, 0.45), 0 1px 8px rgba(0,0,0,0.6);
-      font-family: "SF Mono", Menlo, Consolas, "PingFang SC", monospace;
+      position: absolute; top: max(16px, env(safe-area-inset-top)); left: 0; right: 0;
+      display: flex; justify-content: space-between; padding: 0 26px;
+      font-family: var(--font-mono); color: #d8f6ff;
+      text-shadow: 0 0 12px rgba(110, 242, 255, 0.45), 0 1px 8px rgba(0, 0, 0, 0.6);
     }
-    #dist { font-size: 22px; font-weight: 700; letter-spacing: 1px; font-variant-numeric: tabular-nums; }
-    #comboTop { font-size: 22px; font-weight: 700; letter-spacing: 1px; font-variant-numeric: tabular-nums; color: #6ef2ff; }
-    .toplabel { display: block; font-size: 10px; font-weight: 500; opacity: 0.6; letter-spacing: 3px; margin-bottom: 2px; }
+    #topbar > div { min-width: 120px; }
+    #dist { font-size: 24px; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+    #comboTop { font-size: 24px; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; color: var(--cyan); }
+    .toplabel { display: block; font-size: 10px; letter-spacing: 0.34em; opacity: 0.6; margin-bottom: 4px; text-transform: uppercase; }
 
     #crosshair {
       position: absolute; left: 50%; top: 50%; width: 46px; height: 46px;
@@ -56,7 +76,7 @@
     #crosshair.fire::before { transform: scale(0.82); }
     #crosshair::after {
       content: ""; position: absolute; left: 50%; top: 50%; width: 5px; height: 5px;
-      transform: translate(-50%, -50%); background: #6ef2ff; border-radius: 50%;
+      transform: translate(-50%, -50%); background: var(--cyan); border-radius: 50%;
       box-shadow: 0 0 8px rgba(110, 242, 255, 0.9);
     }
     #crosshair i {
@@ -68,84 +88,130 @@
     #crosshair i:nth-child(4) { top: 50%; right: -4px; height: 2px; width: 10px; transform: translateY(-50%); }
 
     #life {
-      position: absolute; bottom: max(20px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
-      color: #eafcff; text-shadow: 0 0 18px rgba(110, 242, 255, 0.6), 0 1px 12px rgba(0,0,0,0.7);
-      font-family: "SF Mono", Menlo, Consolas, monospace;
+      position: absolute; bottom: max(22px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+      font-family: var(--font-mono); color: #eafcff;
+      text-shadow: 0 0 18px rgba(110, 242, 255, 0.6), 0 1px 12px rgba(0, 0, 0, 0.7);
     }
-    #lifeNum { font-size: 48px; font-weight: 800; font-variant-numeric: tabular-nums; transition: color 0.2s; letter-spacing: 2px; }
+    #lifeNum { font-size: 46px; letter-spacing: 0.08em; font-variant-numeric: tabular-nums; transition: color 0.2s; }
     #life.low #lifeNum { color: #ffb340; text-shadow: 0 0 18px rgba(255, 179, 64, 0.6); }
     #life.critical #lifeNum { color: #ff4b4b; text-shadow: 0 0 22px rgba(255, 75, 75, 0.7); animation: pulse 0.7s infinite; }
     @keyframes pulse { 50% { opacity: 0.45; } }
 
     #multiball {
-      position: absolute; bottom: max(84px, calc(env(safe-area-inset-bottom) + 64px)); left: 50%; transform: translateX(-50%);
-      color: #6ef2ff; font-size: 14px; font-weight: 700; letter-spacing: 2px;
-      text-shadow: 0 0 10px rgba(80, 220, 255, 0.8); opacity: 0; transition: opacity 0.3s;
-      font-family: "SF Mono", Menlo, Consolas, monospace;
+      position: absolute; bottom: max(86px, calc(env(safe-area-inset-bottom) + 66px)); left: 50%; transform: translateX(-50%);
+      font-family: var(--font-mono); color: var(--cyan); font-size: 13px; letter-spacing: 0.26em;
+      text-shadow: 0 0 10px rgba(80, 220, 255, 0.8); opacity: 0; transition: opacity 0.3s; white-space: nowrap;
     }
     #multiball.on { opacity: 1; }
 
     #banner {
       position: absolute; left: 50%; top: 34%; transform: translate(-50%, -50%);
-      text-align: center; color: #fff; opacity: 0; pointer-events: none;
+      text-align: center; color: #fff; opacity: 0; pointer-events: none; white-space: nowrap;
       transition: opacity 0.4s, transform 0.4s;
     }
     #banner.show { opacity: 1; transform: translate(-50%, -60%); }
-    #bannerTitle { font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #eafcff; text-shadow: 0 0 20px rgba(110, 242, 255, 0.8); }
-    #bannerSub { font-size: 14px; letter-spacing: 4px; opacity: 0.8; margin-top: 6px; color: #6ef2ff; }
+    #bannerTitle {
+      font-family: var(--font-display); font-weight: 900; font-size: 30px; letter-spacing: 0.22em; padding-left: 0.22em;
+      color: #eafcff; text-shadow: 0 0 22px rgba(110, 242, 255, 0.85);
+    }
+    #bannerSub { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.32em; padding-left: 0.32em; opacity: 0.85; margin-top: 8px; color: var(--cyan); }
 
     .floater {
       position: absolute; transform: translate(-50%, -50%);
-      color: #eafcff; font-weight: 700; font-size: 18px; pointer-events: none;
-      font-family: "SF Mono", Menlo, Consolas, monospace;
-      text-shadow: 0 0 12px rgba(110, 242, 255, 0.7), 0 1px 6px rgba(0,0,0,0.6);
+      font-family: var(--font-mono); color: #eafcff; font-size: 19px; letter-spacing: 0.04em; pointer-events: none;
+      text-shadow: 0 0 12px rgba(110, 242, 255, 0.7), 0 1px 6px rgba(0, 0, 0, 0.6);
       animation: floatUp 0.8s ease-out forwards;
     }
-    .floater.gem { color: #6ef2ff; text-shadow: 0 0 14px rgba(110, 242, 255, 0.9); }
+    .floater.gem { color: var(--cyan); text-shadow: 0 0 14px rgba(110, 242, 255, 0.9); }
     @keyframes floatUp {
       from { opacity: 1; margin-top: 0; }
       to { opacity: 0; margin-top: -46px; }
     }
 
-    /* ---------- 覆盖层（菜单 / 结束） ---------- */
+    /* ---------- 覆盖层（菜单 / 结算）---------- */
     .overlay {
       position: absolute; inset: 0; z-index: 20;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: radial-gradient(ellipse at center, rgba(8, 14, 24, 0.5) 0%, rgba(4, 6, 12, 0.82) 100%);
+      background: radial-gradient(ellipse at center, rgba(8, 14, 24, 0.5) 0%, rgba(4, 6, 12, 0.84) 100%);
       backdrop-filter: blur(10px) saturate(1.2); -webkit-backdrop-filter: blur(10px) saturate(1.2);
       color: #eafcff; text-align: center; transition: opacity 0.4s;
     }
+    /* 极淡的扫描线：CRT 质感，不干扰文字 */
+    .overlay::before {
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px);
+    }
+    .overlay > * { position: relative; }
     .overlay.hidden { opacity: 0; pointer-events: none; }
-    .title-zh { font-size: clamp(52px, 12vw, 96px); font-weight: 900; letter-spacing: 18px; margin-left: 18px;
-      background: linear-gradient(120deg, #bffbff 5%, #6ef2ff 45%, #ff5fd0 95%);
+
+    .title {
+      font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 8.2vw, 92px); line-height: 1.05;
+      letter-spacing: 0.14em; padding-left: 0.14em;
+      background: linear-gradient(120deg, #bffbff 5%, var(--cyan) 45%, var(--magenta) 95%);
       -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
       filter: drop-shadow(0 0 26px rgba(110, 242, 255, 0.55));
     }
-    .title-en { font-size: 15px; letter-spacing: 10px; margin-left: 10px; opacity: 0.7; margin-top: 4px; text-transform: uppercase; color: #6ef2ff; font-family: "SF Mono", Menlo, Consolas, monospace; }
-    .menu-desc { margin-top: 30px; font-size: 14px; line-height: 2.1; opacity: 0.85; letter-spacing: 1px; }
-    .menu-best { margin-top: 18px; font-size: 13px; opacity: 0.6; letter-spacing: 2px; color: #6ef2ff; font-family: "SF Mono", Menlo, Consolas, monospace; }
-    .btn {
-      margin-top: 34px; padding: 15px 58px; font-size: 17px; font-weight: 700; letter-spacing: 6px;
-      color: #06121a; background: linear-gradient(135deg, #9ffbff, #4fd8ff);
-      border: none; border-radius: 40px; cursor: pointer; pointer-events: auto;
-      box-shadow: 0 0 28px rgba(79, 216, 255, 0.55), 0 0 2px rgba(79, 216, 255, 1);
-      transition: transform 0.15s, box-shadow 0.15s;
+    .kicker {
+      display: flex; align-items: center; gap: 16px; margin-top: 14px;
+      font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.42em; padding-left: 0.42em;
+      color: var(--cyan); opacity: 0.8; text-transform: uppercase;
     }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(79, 216, 255, 0.8); }
-    .btn:active { transform: translateY(0); }
+    .kicker::before, .kicker::after { content: ""; width: 56px; height: 1px; background: linear-gradient(90deg, transparent, rgba(110, 242, 255, 0.8)); }
+    .kicker::after { background: linear-gradient(90deg, rgba(110, 242, 255, 0.8), transparent); }
+    .menu-desc {
+      margin-top: 30px; max-width: 600px; padding: 0 24px;
+      font-family: var(--font-ui); font-weight: 500; font-size: clamp(15px, 1.5vw, 17px); line-height: 1.85;
+      letter-spacing: 0.015em; color: rgba(226, 236, 246, 0.86);
+    }
+    .menu-best {
+      margin-top: 20px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.22em;
+      color: var(--cyan); opacity: 0.85;
+    }
+    /* 按钮外层负责发光（clip-path 会裁掉 box-shadow），内层负责切角形状 */
+    .btnw { display: inline-block; margin-top: 36px; filter: drop-shadow(0 0 18px rgba(79, 216, 255, 0.55)); transition: filter 0.15s; }
+    .btnw.dim { filter: drop-shadow(0 0 10px rgba(110, 242, 255, 0.2)); margin-top: 0; margin-left: 14px; }
+    .btnw:hover { filter: drop-shadow(0 0 28px rgba(79, 216, 255, 0.85)); }
+    .btn {
+      display: block; padding: 16px 50px 15px; font-family: var(--font-display); font-weight: 700; font-size: 15px;
+      letter-spacing: 0.26em; text-transform: uppercase; color: #06121a;
+      background: linear-gradient(135deg, #9ffbff, #4fd8ff); border: none; cursor: pointer; pointer-events: auto;
+      clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+      transition: transform 0.15s;
+    }
+    .btnw:hover .btn { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0) !important; }
     .btn.secondary {
-      background: rgba(255,255,255,0.06); color: #dfe8f4; margin-left: 16px;
+      background: rgba(255, 255, 255, 0.07); color: #dfe8f4; padding: 15px 28px 14px;
       box-shadow: inset 0 0 0 1px rgba(110, 242, 255, 0.45);
     }
-    .over-title { font-size: 42px; font-weight: 900; letter-spacing: 12px; margin-left: 12px; color: #ff5f6f; text-shadow: 0 0 24px rgba(255, 95, 111, 0.6); }
-    .over-stats { margin-top: 28px; display: flex; gap: 46px; }
-    .stat { display: flex; flex-direction: column; gap: 6px; }
-    .stat b { font-size: 30px; font-variant-numeric: tabular-nums; }
-    .stat span { font-size: 11px; letter-spacing: 3px; opacity: 0.6; }
-    .newbest { margin-top: 16px; color: #ffd76e; font-size: 14px; letter-spacing: 3px; text-shadow: 0 0 12px rgba(255, 215, 110, 0.7); }
-    .hint-line { margin-top: 26px; font-size: 12px; opacity: 0.5; letter-spacing: 2px; }
+    .btn-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; }
+    .hint-line { margin-top: 24px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.3em; opacity: 0.55; text-transform: uppercase; }
+
+    .over-title {
+      font-family: var(--font-display); font-weight: 900; font-size: clamp(28px, 4.4vw, 42px); letter-spacing: 0.14em; padding-left: 0.14em;
+      color: #ff5f6f; text-shadow: 0 0 24px rgba(255, 95, 111, 0.6);
+    }
+    .over-stats { margin-top: 30px; display: flex; gap: clamp(28px, 5vw, 60px); }
+    .stat { display: flex; flex-direction: column; gap: 8px; min-width: 120px; }
+    .stat b { font-family: var(--font-mono); font-weight: 400; font-size: 34px; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+    .stat span { font-family: var(--font-ui); font-weight: 700; font-size: 11px; letter-spacing: 0.32em; opacity: 0.6; text-transform: uppercase; }
+    .newbest {
+      margin-top: 18px; font-family: var(--font-ui); font-weight: 700; font-size: 14px; letter-spacing: 0.3em; padding-left: 0.3em;
+      color: #ffd76e; text-shadow: 0 0 12px rgba(255, 215, 110, 0.7); text-transform: uppercase;
+    }
+
+    @media (max-width: 560px) {
+      .kicker { font-size: 11px; letter-spacing: 0.3em; padding-left: 0.3em; gap: 10px; }
+      .kicker::before, .kicker::after { width: 24px; }
+      .lb { display: none; } /* 小屏说明文字自然换行 */
+      .over-stats { gap: 18px; }
+      .stat { min-width: 90px; }
+      .stat b { font-size: 26px; }
+      .btnw.dim { margin-left: 0; margin-top: 12px; }
+      .btn-row { flex-direction: column; }
+    }
   </style>
-  <script type="module" crossorigin src="./assets/index-BX-55gv0.js"></script>
+  <script type="module" crossorigin src="./assets/index-CWE23FiF.js"></script>
 </head>
 <body>
   <div id="app">
@@ -154,39 +220,39 @@
 
     <div id="hud">
       <div id="topbar">
-        <div><span class="toplabel">距离</span><span id="dist">0 m</span></div>
-        <div style="text-align:right"><span class="toplabel">连击</span><span id="comboTop">×0</span></div>
+        <div><span class="toplabel">Distance</span><span id="dist">0 m</span></div>
+        <div style="text-align:right"><span class="toplabel">Streak</span><span id="comboTop">×0</span></div>
       </div>
       <div id="crosshair"><i></i><i></i><i></i><i></i></div>
-      <div id="multiball">多重球 ×1</div>
+      <div id="multiball">Multiball ×1</div>
       <div id="life"><span id="lifeNum">100</span></div>
       <div id="banner"><div id="bannerTitle"></div><div id="bannerSub"></div></div>
     </div>
 
     <div id="menu" class="overlay">
-      <div class="title-zh">碎光</div>
-      <div class="title-en">Shatterline</div>
+      <div class="title">SHATTERLINE</div>
+      <div class="kicker">Full speed · No brakes</div>
       <div class="menu-desc">
-        全速前进，投掷钢球击碎沿途玻璃得分<br />
-        每次投掷消耗 1 分，击中目标加分，撞上障碍扣 20+ 分<br />
-        分数归零即终结 —— 速度会越来越快，祝你好运
+        Race forward and hurl steel orbs to shatter the glass in your path.<br class="lb" />
+        Every throw costs 1 point, every hit earns, crashing into glass costs 20+.<br class="lb" />
+        Hit zero and it's over — and it only gets faster.
       </div>
       <div class="menu-best" id="bestMenu"></div>
-      <button class="btn" id="btnStart">开始</button>
-      <div class="hint-line">点击 / 触摸屏幕任意位置投球</div>
+      <span class="btnw"><button class="btn" id="btnStart">Start</button></span>
+      <div class="hint-line">Click or tap anywhere to throw</div>
     </div>
 
     <div id="gameover" class="overlay hidden">
-      <div class="over-title">分数耗尽</div>
+      <div class="over-title">Score depleted</div>
       <div class="over-stats">
-        <div class="stat"><b id="goScore">0</b><span>最终分数</span></div>
-        <div class="stat"><b id="goDist">0 m</b><span>距离</span></div>
-        <div class="stat"><b id="goBest">0</b><span>最佳分数</span></div>
+        <div class="stat"><b id="goScore">0</b><span>Final score</span></div>
+        <div class="stat"><b id="goDist">0 m</b><span>Distance</span></div>
+        <div class="stat"><b id="goBest">0</b><span>Best score</span></div>
       </div>
-      <div class="newbest hidden" id="newBest">★ 新纪录 ★</div>
-      <div>
-        <button class="btn" id="btnRetry">从检查点继续</button>
-        <button class="btn secondary" id="btnRestart">重新开始</button>
+      <div class="newbest hidden" id="newBest">★ New record ★</div>
+      <div class="btn-row">
+        <span class="btnw"><button class="btn" id="btnRetry">Resume checkpoint</button></span>
+        <span class="btnw dim"><button class="btn secondary" id="btnRestart">Restart</button></span>
       </div>
     </div>
   </div>
