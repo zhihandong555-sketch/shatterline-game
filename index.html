@@ -74,6 +74,10 @@
       transition: transform 0.08s;
     }
     #crosshair.fire::before { transform: scale(0.82); }
+    /* 仅用于触屏出手后准星滑回中心；鼠标跟随时不加过渡，保证贴合 */
+    #crosshair.ease { transition: left 0.25s ease-out, top 0.25s ease-out; }
+    /* 游戏中隐藏原生光标：准星就是光标（菜单/结算要点按钮，不隐藏） */
+    body.playing canvas#gl { cursor: none; }
     #crosshair::after {
       content: ""; position: absolute; left: 50%; top: 50%; width: 5px; height: 5px;
       transform: translate(-50%, -50%); background: var(--cyan); border-radius: 50%;
@@ -211,7 +215,7 @@
       .btn-row { flex-direction: column; }
     }
   </style>
-  <script type="module" crossorigin src="./assets/index-CWE23FiF.js"></script>
+  <script type="module" crossorigin src="./assets/index-Cr37_kmk.js"></script>
 </head>
 <body>
   <div id="app">
